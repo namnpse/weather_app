@@ -4,10 +4,10 @@ import android.Manifest
 import android.app.Application
 import android.content.Context
 import android.content.pm.PackageManager
-import android.location.Location
 import android.location.LocationManager
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.namnp.weatherappcomposemvi.domain.Location
 import com.namnp.weatherappcomposemvi.domain.location.LocationTracker
 import kotlinx.coroutines.suspendCancellableCoroutine
 import javax.inject.Inject
@@ -40,14 +40,18 @@ class DefaultLocationTracker @Inject constructor(
             locationClient.lastLocation.apply {
                 if(isComplete) {
                     if(isSuccessful) {
-                        cont.resume(result)
+                        cont.resume(Location(result.latitude, result.longitude))
                     } else {
                         cont.resume(null)
                     }
                     return@suspendCancellableCoroutine
                 }
                 addOnSuccessListener {
-                    cont.resume(it)
+                    if(it != null) {
+                        cont.resume(Location(it.latitude, it.longitude))
+                    } else {
+                        cont.resume(Location(48.864716, 2.349014))
+                    }
                 }
                 addOnFailureListener {
                     cont.resume(null)
